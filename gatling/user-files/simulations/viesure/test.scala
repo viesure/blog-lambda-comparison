@@ -4,7 +4,7 @@ import io.gatling.core.Predef._
 import io.gatling.http.Predef._
 import scala.concurrent.duration._
 
-class BasicSimulation extends Simulation {
+class TestSimulation extends Simulation {
 
   // Configuration
   val iterations = Integer.getInteger("iterations", 100).toInt
