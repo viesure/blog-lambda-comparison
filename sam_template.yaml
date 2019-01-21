@@ -1,0 +1,89 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+    AWS Serverless Application
+    Template for the comparison lambda - java version
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+    Function:
+        Timeout: 20
+
+
+Resources:
+    JavaLambda:
+        Type: AWS::Serverless::Function
+        Properties:
+            CodeUri: java/target/Lambda-1.0.jar
+            Handler: io.viesure.blog.lambda.Lambda
+            Runtime: java8
+            Events:
+                JavaApi:
+                    Type: Api
+                    Properties:
+                        Path: /java
+                        Method: POST
+    PythonLambda:
+        Type: AWS::Serverless::Function
+        Properties:
+            CodeUri: python
+            Handler: lambda.lambda_handler
+            Runtime: python2.7
+            Events:
+                PythonApi:
+                    Type: Api
+                    Properties:
+                        Path: /python
+                        Method: POST
+    NodeJsLambda:
+        Type: AWS::Serverless::Function
+        Properties:
+            CodeUri: node
+            Handler: lambda.handler
+            Runtime: nodejs8.10
+            Events:
+                NodeJsApi:
+                    Type: Api
+                    Properties:
+                        Path: /nodejs
+                        Method: POST
+
+# Events:
+#     JavaApi:
+#         Type: Api
+#         Properties:
+#             Path: /java
+#             Method: GET
+#     PythonApi:
+#         Type: Api
+#         Properties:
+#             Path: /python
+#             Method: GET
+#     NodeJsApi:
+#         Type: Api
+#         Properties:
+#             Path: /nodejs
+#             Method: GET
+#            Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
+#                Variables:
+#                    PARAM1: VALUE
+#            Events:
+#                HelloWorld:
+#                    Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+#                    Properties:
+#                        Path: /hello
+#                        Method: get
+#
+# Outputs:
+#
+# #    HelloWorldApi:
+# #      Description: "API Gateway endpoint URL for Prod stage for Hello World function"
+# #      Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
+#
+#     HelloWorldFunction:
+#       Description: "Hello World Lambda Function ARN"
+#       Value: !GetAtt LambdaFunction.Arn
+#
+#     HelloWorldFunctionIamRole:
+#       Description: "Implicit IAM Role created for Hello World function"
+#       Value: !GetAtt LambdaFunction.Arn

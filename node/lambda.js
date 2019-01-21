@@ -6,7 +6,7 @@
  * Will succeed with the response body.
  */
 exports.handler = (event, context, callback) => {
-  let limit = event.limit;
+  let limit = JSON.parse(event.body).limit;
   var sign = 1;
   var edge = 1;
   var currentValue = 0;
@@ -23,16 +23,17 @@ exports.handler = (event, context, callback) => {
     //console.log(currentValue);
   }
 
-  return {
-      'statusCode': 200,
-      "status": "Done!",
-      "result": currentValue,
-      "Iterations": iterations
+  response = {
+    'statusCode': 200,
+    'body': JSON.stringify({'status': "Done!",
+    'result': currentValue,
+    'Iterations': iterations})
   }
 
+  callback(null, response);
 };
 
-console.time("Execution")
-let result = exports.handler({limit: 5000}, null, null);
-console.timeEnd("Execution");
-console.log(JSON.stringify(result))
+// console.time("Execution")
+// let result = exports.handler({limit: 5000}, null, null);
+// console.timeEnd("Execution");
+// console.log(JSON.stringify(result))

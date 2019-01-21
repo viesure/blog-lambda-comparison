@@ -2,13 +2,13 @@ package io.viesure.blog.lambda;
 
 public class Request {
 
-    private int limit;
+    private String body;
 
-    public int getLimit() {
-        return limit;
+    public String getBody() {
+        return body;
     }
 
-    public void setLimit(int limit) {
-        this.limit = limit;
+    public void setBody(String body) {
+        this.body = body;
     }
 }
