@@ -4,3 +4,5 @@
 **/target
 gatling/results
 package
+transformed_lambda_template.yaml
+results.zip

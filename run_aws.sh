@@ -20,7 +20,7 @@ fi
 
 # Create EC2 instance
 echo "Starting EC2 instance..."
-aws cloudformation create-stack --stack-name ${STACKNAME} --template-body file://cloudformation.template --parameters ParameterKey=KeyPairName,ParameterValue=${KEYPAIR}
+aws cloudformation create-stack --stack-name ${STACKNAME} --template-body file://cloudformation_template.yaml --parameters ParameterKey=KeyPairName,ParameterValue=${KEYPAIR}
 
 ##ec2response=$(aws ec2 run-instances --image-id ${AMI} --count 1 --instance-type t2.micro --key-name ${KEYPAIR}) --tag-specification Name=gatling-test
 #instanceid=$(aws ec2 run-instances --image-id ${AMI} --count 1 --instance-type t2.micro --key-name ${KEYPAIR} | sed -n '/"InstanceId"/p' | grep -e "i-[a-z0-9]*" -o)
@@ -43,19 +43,30 @@ while true; do
   sleep 5
   echo -n "."
 done
-echo -n "up!"
+echo "up!"
 
 instanceid=$(aws cloudformation describe-stack-resource --stack-name ${STACKNAME} --logical-resource-id GatlingEc2Instance | sed -n '/"PhysicalResourceId"/p' | grep -e "i-[a-z0-9]*" -o)
 publicdns=$(aws ec2 describe-instances --instance-ids ${instanceid} | sed -n "/PublicDnsName/p" | head -1 | grep -o -e "ec2-.*\.com")
 echo "Connecting to Host: ${publicdns}"
 sshhost=ec2-user@${publicdns}
 
-echo "#####"
+echo ""
+echo "Setup Docker"
+# Setup docker, see https://docs.aws.amazon.com/AmazonECS/latest/developerguide/docker-basics.html
+ssh -i ${KEYFILE} -o StrictHostKeyChecking=no ${sshhost} << HERE
+ sudo yum update -y
+ sudo amazon-linux-extras install docker
+ sudo service docker start
+ sudo usermod -a -G docker ec2-user
+ mkdir ~/gatling
+HERE
+
+echo ""
 echo "Copying Gatling resources"
-scp -r -i ${KEYFILE} -o StrictHostKeyChecking=no ./gatling/conf ${sshhost}:~/gatling/conf
-scp -r -i ${KEYFILE} -o StrictHostKeyChecking=no ./gatling/user-files ${sshhost}:~/gatling/user-files
+scp -r -i ${KEYFILE} -o StrictHostKeyChecking=no ./gatling/conf ${sshhost}:~/gatling
+scp -r -i ${KEYFILE} -o StrictHostKeyChecking=no ./gatling/user-files ${sshhost}:~/gatling
 scp -r -i ${KEYFILE} -o StrictHostKeyChecking=no ./run_gatling.sh ${sshhost}:~
 
-echo "####"
-echo "Setup Docker and start Gatling"
+echo ""
+echo "Run Gatling"
 ssh -i ${KEYFILE} -o StrictHostKeyChecking=no ${sshhost} ./run_gatling.sh

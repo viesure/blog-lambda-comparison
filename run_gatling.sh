@@ -1,16 +1,16 @@
-# Setup docker, see https://docs.aws.amazon.com/AmazonECS/latest/developerguide/docker-basics.html
-sudo yum update -y
-sudo amazon-linux-extras install docker
-sudo service docker start
-sudo usermod -a -G docker ec2-user
+# Call with ./run_gatling <baseurl> <iterations> <repeats> <pace>
+# Will use default values for testing locally on osx without parameters
 
 GATLING_DIR="`pwd`/gatling"
 
-iterations=100
-repeats=5
-pace=5
-host="http://host.docker.internal:3000"
+host=${1:-"http://host.docker.internal:3000"}
+iterations=${2:-100}
+repeats=${3:-5}
+pace=${4:-5}
 
 PARAMS="-Diterations=$iterations -Drepeats=$repeats -Dpace=$pace -Dhost=$host"
+
+echo "Waiting for docker daemon to initialize..."
+timeout 30 sh -c "until docker info; do echo  -n '.'; sleep 1; done"
 
 docker run --rm -v $GATLING_DIR/conf:/opt/gatling/conf -v $GATLING_DIR/user-files:/opt/gatling/user-files -v $GATLING_DIR/results:/opt/gatling/results -e JAVA_OPTS="$PARAMS" denvazh/gatling
