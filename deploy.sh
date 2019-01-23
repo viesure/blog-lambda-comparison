@@ -2,8 +2,8 @@
 # This script sets up and deploys 2 Stacks: One for the lambdas, and one for an EC2 instance to execute the gatling tests
 
 if [[ $# < 3 ]]; then
-  echo "./deploy.sh <iterations> <requestcount> <pace>"
-  echo "  iterations     How many iterations the algorithm should perform, effectively setting the execution time. A good value is so that it takes around 1s to execute"
+  echo "./deploy.sh <targetValue> <requestcount> <pace>"
+  echo "  targetValue    How  the algorithm shall calculate, effectively setting the execution time. A good value is so that it takes around 1s to execute"
   echo "  reequestcount  How often each endpoint is called."
   echo "  pace           How fast the endpoint is called. A pace of 2 means that the endpoints are called every 2 seconds. A too large pace means that every request runs into warmup."
   echo ""

@@ -7,13 +7,13 @@ import scala.concurrent.duration._
 class TestSimulation extends Simulation {
 
   // Configuration
-  val iterations = Integer.getInteger("iterations", 100).toInt
+  val targetValue = Integer.getInteger("targetValue", 100).toInt
   val repeats = Integer.getInteger("repeats", 5).toInt
   val paceDuration = Integer.getInteger("pace", 5) seconds
   val host = System.getProperty("host", "http://host.docker.internal:3000")
 
   // Setup
-  val eventPayload = "{ \"limit\": " + iterations + " }"
+  val eventPayload = "{ \"limit\": " + targetValue + " }"
   val httpProtocol = http
     .baseUrl(host)
 

@@ -1,14 +1,14 @@
-# Call with ./run_gatling <baseurl> <iterations> <repeats> <pace>
+# Call with ./run_gatling <baseurl> <targetValue> <repeats> <pace>
 # Will use default values for testing locally on osx without parameters
 
 GATLING_DIR="`pwd`/gatling"
 
 host=${1:-"http://host.docker.internal:3000"}
-iterations=${2:-100}
+targetValue=${2:-100}
 repeats=${3:-5}
 pace=${4:-5}
 
-PARAMS="-Diterations=$iterations -Drepeats=$repeats -Dpace=$pace -Dhost=$host"
+PARAMS="-DtargetValue=$targetValue -Drepeats=$repeats -Dpace=$pace -Dhost=$host"
 
 echo "Waiting for docker daemon to initialize..."
 timeout 30 sh -c "until docker info; do echo  -n '.'; sleep 1; done"
