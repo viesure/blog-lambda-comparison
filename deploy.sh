@@ -1,7 +1,15 @@
 #!/bin/bash
-set -e
-
 # This script sets up and deploys 2 Stacks: One for the lambdas, and one for an EC2 instance to execute the gatling tests
+
+if [[ $# < 3 ]]; then
+  echo "./deploy.sh <iterations> <requestcount> <pace>"
+  echo "  iterations     How many iterations the algorithm should perform, effectively setting the execution time. A good value is so that it takes around 1s to execute"
+  echo "  reequestcount  How often each endpoint is called."
+  echo "  pace           How fast the endpoint is called. A pace of 2 means that the endpoints are called every 2 seconds. A too large pace means that every request runs into warmup."
+  echo ""
+  echo "example: ./deploy 5000 100 3"
+  exit 1
+fi
 
 KEYPAIR=viesure-blog-gatling
 KEYFILE=${KEYPAIR}.pem
@@ -10,6 +18,9 @@ STACK_GATLING=viesure-blog-gatling
 BUCKET=${STACK_LAMBDA}-$(date +%s)
 AWS_TEMPLATE=transformed_lambda_template.yaml
 LOG=deploy_log.txt
+
+# Exit on error
+set -e
 
 function ensureKeyPair {
   if [[ -f "${KEYFILE}" ]]; then
@@ -49,7 +60,7 @@ function waitOnStack {
   echo "up!"
 }
 
-rm ${LOG}
+rm -f ${LOG}
 # Prepare S3 Bucket, Keypair and Lambda cloudformation template
 echo "Using bucket '${BUCKET}''"
 aws s3 mb s3://${BUCKET} >> $LOG
@@ -101,15 +112,20 @@ scp -r -i ${KEYFILE} -o StrictHostKeyChecking=no ./run_gatling.sh ${sshhost}:~
 echo ""
 echo "Run Gatling"
 ssh -i ${KEYFILE} -o StrictHostKeyChecking=no ${sshhost} << HERE
-  ./run_gatling.sh ${url}
+  ./run_gatling.sh ${url} $1 $2 $3
   cd gatling
   zip -r results.zip results
 HERE
 
 echo ""
 echo "Fetching results and uploading to S3"
-scp -r -i ${KEYFILE} -o StrictHostKeyChecking=no ${sshhost}:~/gatling/results.zip ./results.zip
-aws s3 cp ./results.zip s3://${BUCKET}
+RESULTFILE=result_$1.zip
+scp -r -i ${KEYFILE} -o StrictHostKeyChecking=no ${sshhost}:~/gatling/results.zip ./${RESULTFILE}
+aws s3 cp ./${RESULTFILE} s3://${BUCKET}
 
 echo "Shutting down EC2 stack"
 aws cloudformation delete-stack --stack-name ${STACK_GATLING} >> $LOG
+
+echo "############"
+echo "# Finished #"
+echo "############"

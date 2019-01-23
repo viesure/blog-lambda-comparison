@@ -30,7 +30,7 @@ class TestSimulation extends Simulation {
   def getScenario(url: String) = {
     scenario(url).repeat(repeats) {
       pace(paceDuration)
-      .exec(http("request_" + url)
+      exec(http("request_" + url)
         .post("/" + url)
         .body(StringBody(eventPayload))
       )
