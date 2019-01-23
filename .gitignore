@@ -2,7 +2,11 @@
 **/*.iml
 **/dependency-reduced-pom.xml
 **/target
+**/.DS_Store
 gatling/results
 package
 transformed_lambda_template.yaml
-results.zip
+result*
+deploy.log
+*.pem
+*.pub

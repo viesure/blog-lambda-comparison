@@ -17,7 +17,7 @@ STACK_LAMBDA=viesure-blog-lambda
 STACK_GATLING=viesure-blog-gatling
 BUCKET=${STACK_LAMBDA}-$(date +%s)
 AWS_TEMPLATE=transformed_lambda_template.yaml
-LOG=deploy_log.txt
+LOG=deploy.log
 
 # Exit on error
 set -e
@@ -61,6 +61,7 @@ function waitOnStack {
 }
 
 rm -f ${LOG}
+echo "Executing: $0 $@" > $LOG
 # Prepare S3 Bucket, Keypair and Lambda cloudformation template
 echo "Using bucket '${BUCKET}''"
 aws s3 mb s3://${BUCKET} >> $LOG
