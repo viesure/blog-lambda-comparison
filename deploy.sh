@@ -2,8 +2,8 @@
 # This script sets up and deploys 2 Stacks: One for the lambdas, and one for an EC2 instance to execute the gatling tests
 
 if [[ $# < 3 ]]; then
-  echo "./deploy.sh <targetValue> <requestcount> <pace>"
-  echo "  targetValue    How far the algorithm shall calculate, effectively setting the execution time. A good value is so that it takes around 1s to execute"
+  echo "./deploy.sh <iterations> <requestcount> <pace>"
+  echo "  targetValue     How many iterations the algorithm should perform, effectively setting the execution time. A good value is so that it takes around 1s to execute"
   echo "  reequestcount  How often each endpoint is called."
   echo "  pace           How fast the endpoint is called. A pace of 2 means that the endpoints are called every 2 seconds. A too large pace means that every request runs into warmup."
   echo ""
@@ -63,7 +63,7 @@ function waitOnStack {
 rm -f ${LOG}
 echo "Executing: $0 $@" > $LOG
 # Prepare S3 Bucket, Keypair and Lambda cloudformation template
-echo "Using bucket '${BUCKET}'"
+echo "Using bucket '${BUCKET}''"
 aws s3 mb s3://${BUCKET} >> $LOG
 ensureKeyPair
 aws cloudformation package --template-file sam_template.yaml --output-template-file ${AWS_TEMPLATE} --s3-bucket ${BUCKET} >> $LOG
@@ -74,6 +74,7 @@ aws cloudformation deploy --template-file ${AWS_TEMPLATE} --stack-name ${STACK_L
 # Start up the EC2 Stack for the gatling tests
 echo "Starting EC2 stack '${STACK_GATLING}'"
 aws cloudformation create-stack --stack-name ${STACK_GATLING} --template-body file://cloudformation_template.yaml --parameters ParameterKey=KeyPairName,ParameterValue=${KEYPAIR} >> $LOG
+
 
 # Wait for lambda stack to finish starting. The lambda stack should start faster
 waitOnStack ${STACK_LAMBDA}
@@ -89,8 +90,6 @@ echo "RestAPI Url: ${url}"
 waitOnStack ${STACK_GATLING}
 instanceid=$(aws cloudformation describe-stack-resource --stack-name ${STACK_GATLING} --logical-resource-id GatlingEc2Instance | sed -n '/"PhysicalResourceId"/p' | grep -e "i-[a-z0-9]*" -o)
 publicdns=$(aws ec2 describe-instances --instance-ids ${instanceid} | sed -n "/PublicDnsName/p" | head -1 | grep -o -e "ec2-.*\.com")
-# wait a few more second to make sure ssh daemon is started on the host
-sleep 5
 echo "Connecting to Host: ${publicdns}"
 sshhost=ec2-user@${publicdns}
 

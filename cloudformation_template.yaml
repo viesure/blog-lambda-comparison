@@ -2,31 +2,31 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: EC2 Instance for gatling test
 Parameters:
     KeyPairName:
-      Type: 'String'
-      Description: 'Name of the keypair to use for the EC2 instance'
-      Default: 'viesure-blog-gatling'
+      Type: String
+      Description: Name of the keypair to use for the EC2 instance
+      Default: viesure-blog-lambda
 Resources:
   GatlingSecurityGroup:
-    Type: 'AWS::EC2::SecurityGroup'
+    Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupName: 'viesure-blog-gatling'
-      GroupDescription: 'Security group for the gatling test ec2 instance'
+      GroupName: viesure-blog-lambda-test
+      GroupDescription: Security group for the gatling test ec2 instance
       SecurityGroupIngress:
-        - CidrIp: '0.0.0.0/0'
+        - CidrIp: 0.0.0.0/0
           FromPort : 22
           ToPort : 22
-          IpProtocol: 'tcp'
+          IpProtocol: tcp
       Tags:
-        - Key: 'viesure-blog'
-          Value: 'gatling-test'
+        - Key: viesure-blog
+          Value: lambda-test
   GatlingEc2Instance:
-    Type: 'AWS::EC2::Instance'
+    Type: AWS::EC2::Instance
     Properties:
       KeyName: !Ref KeyPairName
-      InstanceType: 't2.micro'
-      ImageId: 'ami-0eaec5838478eb0ba'
+      InstanceType: t2.micro
+      ImageId: ami-0eaec5838478eb0ba
       SecurityGroups:
         - Ref: GatlingSecurityGroup
       Tags:
-        - Key: 'viesure-blog'
-          Value: 'gatling-test'
+        - Key: viesure-blog
+          Value: lambda-test
