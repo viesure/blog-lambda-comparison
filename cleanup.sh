@@ -15,3 +15,5 @@ aws cloudformation delete-stack --stack-name ${STACK_LAMBDA}
 aws logs describe-log-groups --log-group-name-prefix /aws/lambda/viesure-blog | grep -E "(logGroupName.*)(Python|Java|NodeJs)Lambda" | grep -Eo '/aws/lambda/[a-zA-Z0-9-]*' | xargs -n1 aws logs delete-log-group --log-group-name
 # delete ALL buckets from lambdas
 aws s3 ls | grep -oe "${STACK_LAMBDA}.*" | xargs -n1 -I {} aws s3 rb s3://{} --force
+# delete the key used
+aws ec2 delete-key-pair --key-name ${KEYPAIR}
