@@ -63,7 +63,7 @@ function waitOnStack {
 rm -f ${LOG}
 echo "Executing: $0 $@" > $LOG
 echo "Packaging java lambda"
-cd java && mvnw package && cd ..
+cd java && ./mvnw package && cd ..
 # Prepare java package
 
 # Prepare S3 Bucket, Keypair and Lambda cloudformation template
