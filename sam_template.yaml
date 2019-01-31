@@ -1,0 +1,58 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: AWS Serverless Application Template for the comparison lambda
+
+Globals:
+    Function:
+        Timeout: 60
+        MemorySize: 1024
+Resources:
+    JavaLambda:
+        Type: AWS::Serverless::Function
+        Properties:
+            CodeUri: ./java/target/Lambda-1.0.jar
+            Handler: io.viesure.blog.lambda.Lambda
+            Runtime: java8
+            Events:
+                JavaApi:
+                    Type: Api
+                    Properties:
+                        Path: /java
+                        Method: POST
+            Tags:
+              viesure-blog: lambda-test
+    PythonLambda:
+        Type: AWS::Serverless::Function
+        Properties:
+            CodeUri: ./python
+            Handler: lambda.lambda_handler
+            Runtime: python2.7
+            Events:
+                PythonApi:
+                    Type: Api
+                    Properties:
+                        Path: /python
+                        Method: POST
+            Tags:
+              viesure-blog: lambda-test
+    NodeJsLambda:
+        Type: AWS::Serverless::Function
+        Properties:
+            CodeUri: ./node
+            Handler: lambda.handler
+            Runtime: nodejs8.10
+            Events:
+                NodeJsApi:
+                    Type: Api
+                    Properties:
+                        Path: /nodejs
+                        Method: POST
+            Tags:
+              viesure-blog: lambda-test
+    Dashboard:
+        Type: AWS::CloudWatch::Dashboard
+        Properties:
+            DashboardName: viesure-blog-lambda-test
+            # this is the cloudwatch_dashboard inline
+            # you can get this string by executing: cat cloudwatch_dashboard.json | tr -d '\t' | tr -d '\n' | sed -e "s/'/\\\\\"/g"
+            DashboardBody: !Sub '  {    "widgets": [        {            "type": "log",            "x": 6,            "y": 0,            "width": 3,            "height": 3,            "properties": {                "query": "SOURCE \"/aws/lambda/${PythonLambda}\" | fields @duration, @timestamp\n| sort @timestamp asc\n| limit 100\n| stats max(@duration) as maxDuration",                "region": "eu-central-1",                "title": "Python Max"            }        },        {            "type": "log",            "x": 3,            "y": 0,            "width": 3,            "height": 3,            "properties": {                "query": "SOURCE \"/aws/lambda/${NodeJsLambda}\" | fields @duration, @timestamp\n| sort @timestamp asc\n| limit 100\n| stats max(@duration) as maxDuration",                "region": "eu-central-1",                "title": "NodeJs Max"            }        },        {            "type": "log",            "x": 0,            "y": 0,            "width": 3,            "height": 3,            "properties": {                "query": "SOURCE \"/aws/lambda/${JavaLambda}\" | fields @duration, @timestamp\n| sort @timestamp asc\n| limit 100\n| stats max(@duration) as maxDuration",                "region": "eu-central-1",                "title": "Java Max"            }        },        {            "type": "log",            "x": 6,            "y": 3,            "width": 3,            "height": 3,            "properties": {                "query": "SOURCE \"/aws/lambda/${PythonLambda}\" | fields @duration, @timestamp\n| sort @timestamp asc\n| limit 100\n| stats min(@duration) as minDuration",                "region": "eu-central-1",                "title": "Python Min"            }        },        {            "type": "log",            "x": 3,            "y": 3,            "width": 3,            "height": 3,            "properties": {                "query": "SOURCE \"/aws/lambda/${NodeJsLambda}\" | fields @duration, @timestamp\n| sort @timestamp asc\n| limit 100\n| stats min(@duration) as minDuration",                "region": "eu-central-1",                "title": "NodeJs Min"            }        },        {            "type": "log",            "x": 0,            "y": 3,            "width": 3,            "height": 3,            "properties": {                "query": "SOURCE \"/aws/lambda/${JavaLambda}\" | fields @duration, @timestamp\n| sort @timestamp asc\n| limit 100\n| stats min(@duration) as minDuration",                "region": "eu-central-1",                "title": "Java Min"            }        },        {            "type": "log",            "x": 6,            "y": 6,            "width": 3,            "height": 3,            "properties": {                "query": "SOURCE \"/aws/lambda/${PythonLambda}\" | fields @duration, @timestamp\n| filter @duration > 1\n| sort @timestamp desc\n| limit 99\n| stats avg(@duration) as avgDuration",                "region": "eu-central-1",                "title": "Python Avg"            }        },        {            "type": "log",            "x": 3,            "y": 6,            "width": 3,            "height": 3,            "properties": {                "query": "SOURCE \"/aws/lambda/${NodeJsLambda}\" | fields @duration, @timestamp\n| filter @duration > 1\n| sort @timestamp desc\n| limit 99\n| stats avg(@duration) as avgDuration",                "region": "eu-central-1",                "title": "NodeJs Avg"            }        },        {            "type": "log",            "x": 0,            "y": 6,            "width": 3,            "height": 3,            "properties": {                "query": "SOURCE \"/aws/lambda/${JavaLambda}\" | fields @duration, @timestamp\n| filter @duration > 1\n| sort @timestamp desc\n| limit 99\n| stats avg(@duration) as avgDuration",                "region": "eu-central-1",                "title": "Java Avg"            }        },        {            "type": "log",            "x": 6,            "y": 9,            "width": 3,            "height": 3,            "properties": {                "query": "SOURCE \"/aws/lambda/${PythonLambda}\" | fields @duration, @timestamp\n| filter @duration > 1\n| sort @timestamp desc\n| limit 99\n| stats percentile(@duration, 50) as 50perc",                "region": "eu-central-1",                "title": "Python 50 Percentile"            }        },        {            "type": "log",            "x": 3,            "y": 9,            "width": 3,            "height": 3,            "properties": {                "query": "SOURCE \"/aws/lambda/${NodeJsLambda}\" | fields @duration, @timestamp\n| filter @duration > 1\n| sort @timestamp desc\n| limit 99\n| stats percentile(@duration, 50) as 50perc",                "region": "eu-central-1",                "title": "NodeJs 50 Percentile"            }        },        {            "type": "log",            "x": 0,            "y": 9,            "width": 3,            "height": 3,            "properties": {                "query": "SOURCE \"/aws/lambda/${JavaLambda}\" | fields @duration, @timestamp\n| filter @duration > 1\n| sort @timestamp desc\n| limit 99\n| stats percentile(@duration, 50) as 50perc",                "region": "eu-central-1",                "title": "Java 50 Percentile"            }        }    ]}'
